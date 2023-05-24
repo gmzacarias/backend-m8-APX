@@ -1,0 +1,8 @@
+{
+ "email": "user@gmail.com",
+ "password": "12345678",
+ "userName":"mauro",
+ "profilePhoto":"https://pbs.twimg.com/media/D6uc2kBX4AAv3xV.jpg"
+}
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjgzOTIzMTczfQ.IrKD3GQGT744vPi47qnE_J4rwb2QKxNqcATMJobdW5I

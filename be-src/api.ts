@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { createUser, checkMail, updateUser } from "./controllers/users-controller"
 import { getReports, createReport } from "./controllers/reports-controller"
 import { getAllPets, petsAroundMe, createPet, updatePet, deletePetById, allPetsByUser, reportPetFound } from "./controllers/pets-controllers"
-import { getToken } from "./controllers/auth-controller"
+import { generateToken, getToken, resetPassword, sendResetPassword } from "./controllers/auth-controller"
 import cors from "cors";
 import * as path from "path"
 import { authMiddleware, CheckMiddleware } from "./models/middlewares"
@@ -67,6 +67,41 @@ app.put("/update-user", CheckMiddleware, authMiddleware, async (req, res) => {
         res.status(400).json(error)
     }
 })
+
+//reset password
+app.post("/reset-password",async (req,res)=>{
+const {email}= req.body;
+try{
+    const token=generateToken(email)
+
+    await sendResetPassword(email,token);
+
+    res.json({message:"Se ha enviado un correo electronico para restablecer la contraseña"})
+
+}
+catch (error){
+    console.error("Error al solicitar restablecer la contraseña",error)
+    res.status(500).json({error:"Ha ocurrido un error al solicitar restablecer la contraseña"})
+}
+})
+
+//reestablecer contraseña
+app.post("reset-password/:token",async (req,res)=>{
+    const {token}=req.params;
+    const {newPassword}=req.body;
+
+    try{
+        await resetPassword(token,newPassword)
+
+        res.json({message:"La contraseña se ha restablecido correctamente"})
+    }
+    catch(error){
+        console.error("Error al restablecer la contraseña",error)
+        res.status(500).json({error:"Ha ocurrido un error al restablecer la contraseña"})
+    }
+})
+
+
 
 //get my pets
 app.get("/user/pets", authMiddleware, async (req, res) => {
