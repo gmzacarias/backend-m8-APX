@@ -25,7 +25,7 @@ const port = process.env.PORT || 3000
 app.post("/auth", CheckMiddleware, async (req, res) => {
     try {
         const user = await createUser(req.body)
-        res.json(user)
+        res.status(201).json(user)
     } catch (error) {
         res.status(400).json(error)
     }
@@ -36,7 +36,7 @@ app.post("/auth", CheckMiddleware, async (req, res) => {
 app.get("/check-email", async (req, res) => {
     try {
         const userEmail = await checkMail(req.query.email)
-        res.json(userEmail)
+        res.status(200).json(userEmail)
     } catch (error) {
         res.status(400).json(error)
     }
@@ -46,7 +46,7 @@ app.get("/check-email", async (req, res) => {
 app.post("/auth/token", CheckMiddleware, async (req, res) => {
     try {
         const token = await getToken(req.body)
-        res.json(token)
+        res.status(200).json(token)
         res.json({
             original: req.body,
             hash: token
@@ -62,7 +62,7 @@ app.put("/update-user", CheckMiddleware, authMiddleware, async (req, res) => {
     const { userId } = req.query
     try {
         const update = await updateUser(req.body, userId)
-        res.json(update)
+        res.status(200).json(update)
     } catch (error) {
         res.status(400).json(error)
     }
@@ -76,7 +76,7 @@ try{
 
     await sendResetPassword(email,token);
 
-    res.json({message:"Se ha enviado un correo electronico para restablecer la contraseña"})
+    res.status(200).json({message:"Se ha enviado un correo electronico para restablecer la contraseña"})
 
 }
 catch (error){
@@ -93,7 +93,7 @@ app.post("reset-password/:token",async (req,res)=>{
     try{
         await resetPassword(token,newPassword)
 
-        res.json({message:"La contraseña se ha restablecido correctamente"})
+        res.status(200).json({message:"La contraseña se ha restablecido correctamente"})
     }
     catch(error){
         console.error("Error al restablecer la contraseña",error)
@@ -108,7 +108,7 @@ app.get("/user/pets", authMiddleware, async (req, res) => {
     const { userId } = req.query
     try {
         const data = await allPetsByUser(userId)
-        res.json(data)
+        res.status(200).json(data)
         console.log(data)
     } catch (error) {
         res.status(400).json(error)
@@ -124,7 +124,7 @@ app.post("/create-pet", authMiddleware, async (req, res,user:any) => {
     const userId = req.user.id;
     try {
         const createNewPet = await createPet(req.body,userId)
-        res.json(createNewPet)
+        res.status(201).json(createNewPet)
     } catch (error) {
         res.status(400).json(error)
     }
@@ -138,7 +138,7 @@ app.put("/update-pet", authMiddleware, async (req, res) => {
     const { petId } = req.query
     try {
         const data = await updatePet(req.body, petId)
-        res.json(data)
+        res.status(200).json(data)
     } catch (error) {
         res.status(400).json(error)
     }
@@ -150,7 +150,7 @@ app.delete("/pet", authMiddleware, async (req, res) => {
     const { petId } = req.query
     try {
         const data = await deletePetById(petId)
-        res.json(data)
+        res.status(200).json(data)
     } catch (error) {
         res.status(400).json(error)
     }
@@ -163,7 +163,7 @@ app.post("/report-pet", async (req, res) => {
     const { petId } = req.query
     try {
         const newReport = await createReport(petId, req.body)
-        res.json(newReport)
+        res.status(201).json(newReport)
     } catch (error) {
         res.status(400).json(error)
     }
@@ -175,7 +175,7 @@ app.put("/pet-found", authMiddleware, async (req, res) => {
     try {
 
         const data = await reportPetFound(petId)
-        res.json(data)
+        res.status(200).json(data)
     } catch (error) {
         res.status(400)
         console.log(error)
@@ -187,7 +187,7 @@ app.get("/pets-around-me", async (req, res) => {
     const { lat, lng } = req.query
     try {
         const hits = await petsAroundMe(lat, lng)
-        res.json(hits);
+        res.status(200).json(hits);
     } catch (error) {
         res.status(400).json(error)
     }
@@ -198,13 +198,13 @@ app.get("/pets-around-me", async (req, res) => {
 //get all reports
 app.get("/all-reports", async (req, res) => {
     const reports = await getReports()
-    res.json(reports)
+    res.status(200).json(reports)
 })
 
 //get all pets
 app.get("/all-pets", async (req, res) => {
     const allPets = await getAllPets()
-    res.json(allPets)
+    res.status(200).json(allPets)
 })
 
 
