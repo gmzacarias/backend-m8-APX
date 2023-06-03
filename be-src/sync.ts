@@ -1,4 +1,4 @@
 import { sequelize } from "./models/sequelize";
 import "./models"
 
-sequelize.sync({ force: true }).then((res) => console.log(res));
+sequelize.sync({ alter: true }).then((res) => console.log(res));

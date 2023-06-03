@@ -1,6 +1,6 @@
 import express from 'express';
 import 'dotenv/config'
-import { createUser, checkMail, updateUser } from "./controllers/users-controller"
+import { createUser, checkMail, updateUser, getAllUsers } from "./controllers/users-controller"
 import { getReports, createReport } from "./controllers/reports-controller"
 import { getAllPets, petsAroundMe, createPet, updatePet, deletePetById, allPetsByUser, reportPetFound } from "./controllers/pets-controllers"
 import { generateToken, getToken, resetPassword, sendResetPassword } from "./controllers/auth-controller"
@@ -21,6 +21,23 @@ app.use(function (req, res, next) {
 app.options('*', cors())
 app.use(cors());
 const port = process.env.PORT || 3000
+
+//verify email
+app.get("/check-email", async (req, res) => {
+    try {
+        const { email } = req.query
+        const emailExists = await checkMail(email)
+        if (emailExists) {
+            res.status(200).json({ message: "El correo electrónico existe en la base de datos" });
+        } else {
+            //
+            res.status(302).json({ message: "El correo electrónico no existe en la base de datos" });
+        }
+    } catch (error) {
+        res.status(400).json(error)
+    }
+})
+
 //sign up
 app.post("/auth", CheckMiddleware, async (req, res) => {
     try {
@@ -32,25 +49,17 @@ app.post("/auth", CheckMiddleware, async (req, res) => {
 
 })
 
-//verify email
-app.get("/check-email", async (req, res) => {
-    try {
-        const userEmail = await checkMail(req.query.email)
-        res.status(200).json(userEmail)
-    } catch (error) {
-        res.status(400).json(error)
-    }
-})
-
-//login
+//sign in
 app.post("/auth/token", CheckMiddleware, async (req, res) => {
     try {
         const token = await getToken(req.body)
-        res.status(200).json(token)
-        res.json({
-            original: req.body,
-            hash: token
-        })
+
+        if (!token) {
+            res.status(401).json({ error: "Error en la contraseña,acceso no autorizado" });
+        } else {
+            res.status(200).json(token)
+        }
+
     } catch (error) {
         res.status(400).json(error)
     }
@@ -69,35 +78,35 @@ app.put("/update-user", CheckMiddleware, authMiddleware, async (req, res) => {
 })
 
 //reset password
-app.post("/reset-password",async (req,res)=>{
-const {email}= req.body;
-try{
-    const token=generateToken(email)
+app.post("/reset-password", async (req, res) => {
+    const { email } = req.body;
+    try {
+        const token = generateToken(email)
 
-    await sendResetPassword(email,token);
+        await sendResetPassword(email, token);
 
-    res.status(200).json({message:"Se ha enviado un correo electronico para restablecer la contraseña"})
+        res.status(200).json({ message: "Se ha enviado un correo electronico para restablecer la contraseña" })
 
-}
-catch (error){
-    console.error("Error al solicitar restablecer la contraseña",error)
-    res.status(500).json({error:"Ha ocurrido un error al solicitar restablecer la contraseña"})
-}
+    }
+    catch (error) {
+        console.error("Error al solicitar restablecer la contraseña", error)
+        res.status(500).json({ error: "Ha ocurrido un error al solicitar restablecer la contraseña" })
+    }
 })
 
 //reestablecer contraseña
-app.post("reset-password/:token",async (req,res)=>{
-    const {token}=req.params;
-    const {newPassword}=req.body;
+app.post("reset-password/:token", async (req, res) => {
+    const { token } = req.params;
+    const { newPassword } = req.body;
 
-    try{
-        await resetPassword(token,newPassword)
+    try {
+        await resetPassword(token, newPassword)
 
-        res.status(200).json({message:"La contraseña se ha restablecido correctamente"})
+        res.status(200).json({ message: "La contraseña se ha restablecido correctamente" })
     }
-    catch(error){
-        console.error("Error al restablecer la contraseña",error)
-        res.status(500).json({error:"Ha ocurrido un error al restablecer la contraseña"})
+    catch (error) {
+        console.error("Error al restablecer la contraseña", error)
+        res.status(500).json({ error: "Ha ocurrido un error al restablecer la contraseña" })
     }
 })
 
@@ -120,10 +129,10 @@ app.get("/user/pets", authMiddleware, async (req, res) => {
 //Endpoints pets
 
 //create pet
-app.post("/create-pet", authMiddleware, async (req, res,user:any) => {
+app.post("/create-pet", authMiddleware, async (req, res, user: any) => {
     const userId = req.user.id;
     try {
-        const createNewPet = await createPet(req.body,userId)
+        const createNewPet = await createPet(req.body, userId)
         res.status(201).json(createNewPet)
     } catch (error) {
         res.status(400).json(error)
@@ -207,6 +216,11 @@ app.get("/all-pets", async (req, res) => {
     res.status(200).json(allPets)
 })
 
+//get all users
+app.get("/all-users", async (req, res) => {
+    const allUsers = await getAllUsers()
+    res.status(200).json(allUsers)
+})
 
 
 const relativeRoute = path.resolve(__dirname, "../../dist");
