@@ -9,17 +9,26 @@ import * as path from "path"
 import { authMiddleware, CheckMiddleware } from "./models/middlewares"
 import "./types"
 
+
 let app = express()
+
+app.use( cors({ origin: true, credentials: true  }) );
+
 app.use(express.json({
     limit: "100mb"
 }));
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
     next();
 });
+
+
 app.options('*', cors())
-app.use(cors());
 const port = process.env.PORT || 3000
 
 //verify email
@@ -39,12 +48,18 @@ app.get("/check-email", async (req, res) => {
 })
 
 //sign up
-app.post("/auth", CheckMiddleware, async (req, res) => {
+app.post("/auth/signup", CheckMiddleware, async (req, res) => {
     try {
         const user = await createUser(req.body)
-        res.status(201).json(user)
+        if (user) {
+            res.status(201).json(user)
+
+        } else {
+            res.status(400).json({ message: "hubo un problema al crear el usuario" })
+
+        }
     } catch (error) {
-        res.status(400).json(error)
+        console.log(error)
     }
 
 })

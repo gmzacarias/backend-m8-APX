@@ -13,12 +13,14 @@ export async function createUser(data) {
         const newUser = await User.create({
             email,
             userName,
+            password,
             profilePhoto: userPicture 
         });
 
         
 
         await Auth.create({
+            userName,
             email,
             password: getSHA256ofString(password),
             myID: newUser.get("id"),
