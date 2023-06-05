@@ -20,10 +20,10 @@ export async function createUser(data) {
         
 
         await Auth.create({
+            myID: newUser.get("id"),
             userName,
             email,
             password: getSHA256ofString(password),
-            myID: newUser.get("id"),
             profilePhoto: userPicture
         });
 

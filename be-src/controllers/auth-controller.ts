@@ -51,14 +51,15 @@ export function generateToken(email) {
     return token
 }
 
-export async function recoverPassword(email) {
+export async function recoverPassword(email,token) {
     try {
         const user = await Auth.findOne({ where: { email } })
         if (!user) {
             throw new Error("no se encontro al usuario")
         }
-        const token = generateToken(email)
-        await sendResetPassword(email)
+     
+
+        await sendResetPassword(email,token)
         return "se ha enviado un correo electronico con el token generado"
     }
     catch (error) {
@@ -95,17 +96,17 @@ export async function resetPassword(token, newPassword) {
 }
 
 
-export async function sendResetPassword(email, token?) {
+export async function sendResetPassword(email, token) {
     const verifiedSender = "gastonmzacarias@gmail.com"
     const msg = {
         to: email,
         from: verifiedSender,
         subject: "Rstablecimiento de contraseña",
         html:
-            `<p>Hola,</p>
+            `<p>Hola</p>
             <p>Recibiste este correo electrónico porque solicitaste restablecer tu contraseña.</p>
       <p>Por favor, haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-      <a href="https://localhost:3000?token=${token}">Restablecer contraseña</a>
+      <a href="https://localhost:3000/reset-password?token=${token}">Restablecer contraseña</a>
       <p>Si no solicitaste restablecer tu contraseña, ignora este correo electrónico.</p>
       <p>Gracias.</p>
     `,

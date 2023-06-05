@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { createUser, checkMail, updateUser, getAllUsers } from "./controllers/users-controller"
 import { getReports, createReport } from "./controllers/reports-controller"
 import { getAllPets, petsAroundMe, createPet, updatePet, deletePetById, allPetsByUser, reportPetFound } from "./controllers/pets-controllers"
-import { generateToken, getToken, resetPassword, sendResetPassword } from "./controllers/auth-controller"
+import { generateToken, getToken, recoverPassword, resetPassword, sendResetPassword } from "./controllers/auth-controller"
 import cors from "cors";
 import * as path from "path"
 import { authMiddleware, CheckMiddleware } from "./models/middlewares"
@@ -98,10 +98,10 @@ app.post("/reset-password", async (req, res) => {
     try {
         const token = generateToken(email)
 
-        await sendResetPassword(email, token);
+        await recoverPassword(email,token);
 
         res.status(200).json({ message: "Se ha enviado un correo electronico para restablecer la contraseña" })
-
+console.log("Reset password", email,token)
     }
     catch (error) {
         console.error("Error al solicitar restablecer la contraseña", error)
@@ -110,7 +110,7 @@ app.post("/reset-password", async (req, res) => {
 })
 
 //reestablecer contraseña
-app.post("reset-password/:token", async (req, res) => {
+app.post("/reset-password/:token", async (req, res) => {
     const { token } = req.params;
     const { newPassword } = req.body;
 
